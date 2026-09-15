@@ -137,9 +137,6 @@ USE_TZ = True
 
 # static files setup
 
-STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
-
 # storage setup
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -147,12 +144,17 @@ AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_S3_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.getenv("AWS_DEFAULT_REGION")
 AWS_S3_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
 
+STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/static/'
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+
+
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
     },
     "staticfiles": {
-            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "storages.backends.s3.S3StaticStorage",
         },
 }
 
