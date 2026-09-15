@@ -15,4 +15,5 @@ dependencies = [
     "ruff>=0.16.7",
     "uvicorn>=0.53.0",
     "uvicorn-worker>=0.4.0",
+    "whitenoise>=6.12.0",
 ]
