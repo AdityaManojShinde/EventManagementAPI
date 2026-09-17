@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import permissions, viewsets
 
@@ -7,7 +8,16 @@ from event_app.serializers import (
     EventSerializer,
     EventRegistrationSerializer,
     EventCheckInSerializer,
+    EventOptionSerializer
 )
+
+
+class EventOptionViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Event.objects.filter(
+        end_at__gte=timezone.now(),
+    ).only("id", "title")
+    serializer_class = EventOptionSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class EventView(viewsets.ModelViewSet):
@@ -22,6 +32,8 @@ class EventView(viewsets.ModelViewSet):
         if self.action in ("list", "retrieve"):
             return [permissions.AllowAny()]
         return [permissions.IsAdminUser()]
+
+
 
 
 class RegistrationView(viewsets.ModelViewSet):

@@ -3,6 +3,12 @@ from rest_framework import serializers
 from event_app.models import Event, Registration, CheckIn
 
 
+
+class EventOptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = ["id", "title"]
+
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
