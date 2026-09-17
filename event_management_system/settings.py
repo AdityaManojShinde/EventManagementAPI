@@ -2,12 +2,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 import urllib.parse
+from datetime import timedelta
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
@@ -33,10 +33,13 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     "storages",
     "rest_framework",
     "django_ckeditor_5",
@@ -48,12 +51,14 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # created apps
     "event_app",
+    "auth_app",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", # whitenoise middleware
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise middleware
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -80,7 +85,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "event_management_system.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
@@ -105,7 +109,6 @@ else:
         }
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators
 
@@ -123,7 +126,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
@@ -148,8 +150,6 @@ AWS_S3_ENDPOINT_URL = os.getenv("AWS_ENDPOINT_URL")
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-
-
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
@@ -168,10 +168,12 @@ MAILERS = {
     },
 }
 
-
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "auth_app.authentication.CookieJWTAuthentication",
+    ),
 }
 
 CKEDITOR_5_CONFIGS = {
@@ -208,4 +210,25 @@ CKEDITOR_5_CONFIGS = {
             "blockQuote",
         ],
     },
+}
+
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]  # your frontend origin
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=3),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
