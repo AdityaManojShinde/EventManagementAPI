@@ -20,11 +20,13 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class EventRegistrationSerializer(serializers.ModelSerializer):
+    event_name = serializers.CharField(source="event.title", read_only=True)
     class Meta:
         model = Registration
         fields = [
             "id",
             "event",
+            "event_name",
             "email",
             "name",
             "phone",
