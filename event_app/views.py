@@ -2,6 +2,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import permissions, viewsets
 from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from event_app.models import Event, Registration, CheckIn
 from event_app.serializers import (
@@ -74,6 +76,33 @@ class CheckInView(viewsets.ModelViewSet):
     queryset = CheckIn.objects.all()
     serializer_class = EventCheckInSerializer
     permission_classes = [permissions.IsAdminUser]
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="toggle/(?P<registration_id>[^/.]+)",
+    )
+    def toggle(self, request, registration_id=None):
+        check_in = CheckIn.objects.filter(
+            registration_id=registration_id
+        ).first()
+
+        if check_in:
+            check_in.delete()
+
+            return Response({
+                "present": False,
+                "message": "Registration marked as unmarked."
+            })
+
+        check_in = CheckIn.objects.create(
+            registration_id=registration_id
+        )
+
+        return Response({
+            "present": True,
+            "message": "Registration marked as present."
+        })
 
 
 class UserViewSet(viewsets.ModelViewSet):
