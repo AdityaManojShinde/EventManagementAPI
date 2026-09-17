@@ -1,6 +1,7 @@
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import permissions, viewsets
+from django.db.models import Q
 
 from event_app.models import Event, Registration, CheckIn
 from event_app.serializers import (
@@ -34,8 +35,6 @@ class EventView(viewsets.ModelViewSet):
         return [permissions.IsAdminUser()]
 
 
-
-
 class RegistrationView(viewsets.ModelViewSet):
     """
     CRUS endpoint for Registration. create is public while other require admin permissions
@@ -43,6 +42,23 @@ class RegistrationView(viewsets.ModelViewSet):
 
     queryset = Registration.objects.all()
     serializer_class = EventRegistrationSerializer
+
+    def get_queryset(self):
+        queryset = Registration.objects.all()
+
+        event_id = self.request.query_params.get("event_id")
+        search = self.request.query_params.get("search")
+
+        if event_id:
+            queryset = queryset.filter(event_id=event_id)
+
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(email__icontains=search)
+            )
+
+        return queryset
 
     def get_permissions(self):
         if self.action == "create":
