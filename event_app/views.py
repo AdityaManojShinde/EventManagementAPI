@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.contrib.auth.models import User
 from rest_framework import permissions, viewsets
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -46,7 +46,11 @@ class RegistrationView(viewsets.ModelViewSet):
     serializer_class = EventRegistrationSerializer
 
     def get_queryset(self):
-        queryset = Registration.objects.all()
+        queryset = Registration.objects.annotate(
+            is_present=Exists(
+                CheckIn.objects.filter(registration_id=OuterRef("pk"))
+            )
+        )
 
         event_id = self.request.query_params.get("event_id")
         search = self.request.query_params.get("search")

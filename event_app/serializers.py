@@ -27,6 +27,7 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventRegistrationSerializer(serializers.ModelSerializer):
     event_name = serializers.CharField(source="event.title", read_only=True)
+    is_present = serializers.BooleanField(read_only=True, default=False)
     class Meta:
         model = Registration
         fields = [
@@ -39,6 +40,7 @@ class EventRegistrationSerializer(serializers.ModelSerializer):
             "department",
             "course",
             "college",
+            "is_present",
         ]
 
 
